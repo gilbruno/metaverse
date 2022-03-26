@@ -51,9 +51,33 @@ contract Land is ERC721 {
     function mint(uint256 _id) public payable {
         uint256 supply = totalSupply;
         require(supply <= maxSupply);
-        //Ensure that the NFT you want to min don't have any owner
+        //Ensure that the Land NFT you want to mitn don't have any owner
         require(buildings[_id -1].owner == address(0x0));
+        //1 ether minimum is required to buy a land
         require(msg.value >= 1 ether);
+        buildings[_id -1].owner = msg.sender;
+        totalSupply++;
+        _safeMint(msg.sender, _id);
+    }
+
+    function transferFrom(address from, address to, uint256 tokenId) public override {
+        require(_isApprovedOrOwner(_msgSender(), tokenId), "ERC721 : transfer caller is not owneror approved");
+        buildings[tokenId -1].owner = to;
+        _transfer(from, to, tokenId);
+    }
+
+    function safeTransferFrom(address from, address to, uint256 tokenId, bytes memory _data) public override {
+        require(_isApprovedOrOwner(_msgSender(), tokenId), "ERC721 : transfer caller is not owneror approved");
+        buildings[tokenId -1].owner = to;
+        _safeTransfer(from, to, tokenId, _data);
+    }
+
+    function getBuildings() public view returns (Building[] memory) {
+        return buildings;
+    }
+
+    function getBuilding(uint256 _id) public view returns (Building memory) {
+        return buildings[_id-1];
     }
 
 }
